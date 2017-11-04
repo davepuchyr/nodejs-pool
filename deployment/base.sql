@@ -52,7 +52,7 @@ CREATE TABLE `config` (
 CREATE TABLE `payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `unlocked_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `paid_time` timestamp NOT NULL DEFAULT '1970-01-01 00:00:01',
+  `paid_time` timestamp NOT NULL DEFAULT '1971-04-01 01:06:00',
   `pool_type` varchar(64) DEFAULT NULL,
   `payment_address` varchar(125) DEFAULT NULL,
   `transaction_id` int(11) DEFAULT NULL COMMENT 'Transaction ID in the transactions table',
