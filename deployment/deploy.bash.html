@@ -55,10 +55,11 @@ source ~/.nvm/nvm.sh
 nvm install v6.9.2</span>
 cd ~/nodejs-pool
 npm install
-npm install -g pm2
+<span class="strike">npm install -g pm2</span>
 <span class="strike">openssl req -subj "/C=IT/ST=Pool/L=Daemon/O=Mining Pool/CN=mining.pool" -newkey rsa:2048 -nodes -keyout cert.key -x509 -out cert.pem -days 36500</span>
 mkdir ~/pool_db/
-sed -r "s/(\"db_storage_path\": ).*/\1\"\/home\/$CURUSER\/pool_db\/\",/" config_example.json > config.json
+ln -svf nodejs-pool-config/config.thishost.json .
+<span class="strike">sed -r "s/(\"db_storage_path\": ).*/\1\"\/home\/$CURUSER\/pool_db\/\",/" config_example.json > config.json</span>
 cd ~
 git clone --recursive https://github.com/davepuchyr/poolui.git
 cd poolui
@@ -99,15 +100,15 @@ sudo chown -R $CURUSER ~/.pm2
 <span class="strike">echo "Installing pm2-logrotate in the background!"</span>
 pm2 install pm2-logrotate
 bash ~/nodejs-pool/deployment/install_lmdb_tools.sh
-
-# only on nld at genesis:
-mysql -u root -h nld -p < deployment/base.sql
+<span class="strike">mysql -u root -h nld -p < deployment/base.sql
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'authKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'Auth key sent with all Websocket frames for validation.')"
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'secKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'HMAC key for Passwords.  JWT Secret Key.  Changing this will invalidate all current logins.')"
-<span class="strike">pm2 start init.js --name=api --log-date-format="YYYY-MM-DD HH:mm Z" -- --module=api</span>
+pm2 start init.js --name=api --log-date-format="YYYY-MM-DD HH:mm Z" -- --module=api</span>
+# only at genesis:
+mysql -u root -p < nodejs-pool-config/config.sql
 cd ~/nodejs-pool/sql_sync/
 node sql_sync.js
-echo "You're setup!  Please read the rest of the readme for the remainder of your setup and configuration.  These steps include: Setting your Fee Address, Pool Address, Global Domain, and the Mailgun setup!"
+echo "You're setup, excluding firewalld ports 8000, 8001 for api and 10000, 20000 for miners!  Please read the rest of the readme for the remainder of your setup and configuration."  <span class="strike">These steps include: Setting your Fee Address, Pool Address, Global Domain, and the Mailgun setup!</span>
       </pre>
    </body>
 </html>
