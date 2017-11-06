@@ -14,6 +14,17 @@
             "--debug=true",
             "--module=api"
          ]
+      },
+      {
+         "type": "node",
+         "request": "launch",
+         "name": "pool",
+         "program": "${workspaceFolder}/init.js",
+         "console": "internalConsole",
+         "args": [
+            "--debug=true",
+            "--module=pool"
+         ]
       }
    ]
 }
