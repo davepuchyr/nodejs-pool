@@ -74,6 +74,3 @@ jspm_packages
 # Yarn Integrity file
 .yarn-integrity
 
-config.json
-cert.key
-
