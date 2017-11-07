@@ -19,7 +19,7 @@ if [[ `whoami` == "root" ]]; then
     exit 1
 fi
 ROOT_SQL_PASS=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)</span>
-CURUSER=$(whoami)
+export CURUSER=$(whoami)
 <span class="strike">sudo timedatectl set-timezone Etc/UTC
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
@@ -27,41 +27,42 @@ sudo debconf-set-selections <<< "mysql-server mysql-server/root_password passwor
 sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $ROOT_SQL_PASS"
 echo -e "[client]\nuser=root\npassword=$ROOT_SQL_PASS" | sudo tee /root/.my.cnf
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install git python-virtualenv python3-virtualenv curl ntp build-essential screen cmake pkg-config libboost-all-dev libevent-dev libunbound-dev libminiupnpc-dev libunwind8-dev liblzma-dev libldns-dev libexpat1-dev libgtest-dev mysql-server lmdb-utils libzmq3-dev</span>
-cd ~
-git clone --recursive https://github.com/davepuchyr/nodejs-pool.git
+cd /opt
+sudo git clone --recursive https://github.com/davepuchyr/nodejs-pool.git ; sudo chown -R monero nodejs-pool
 <span class="strike">cd /usr/src/gtest
 sudo cmake .
 sudo make
 sudo mv libg* /usr/lib/
 cd ~
 sudo systemctl enable ntp</span>
-cd /usr/local/src
-sudo git clone https://github.com/monero-project/monero.git
+cd /opt
+sudo sudo git clone https://github.com/monero-project/monero.git ; sudo chown -R monero monero
 cd monero
 sudo git checkout v0.11.1.x
 <span class="strike">curl https://raw.githubusercontent.com/Snipa22/nodejs-pool/master/deployment/monero_daemon.patch | sudo git apply -v</span>
 sudo make -j$(nproc)
-sudo cp ~/nodejs-pool/deployment/monerod.service /lib/systemd/system/
+sudo cp /opt/nodejs-pool/deployment/monerod.service /etc/systemd/system/
 <span class="strike">sudo useradd -m monerodaemon -d /home/monerodaemon
 BLOCKCHAIN_DOWNLOAD_DIR=$(sudo -u monerodaemon mktemp -d)
 sudo -u monerodaemon wget --limit-rate=50m -O $BLOCKCHAIN_DOWNLOAD_DIR/blockchain.raw https://downloads.getmonero.org/blockchain.raw
 sudo -u monerodaemon /usr/local/src/monero/build/release/bin/monero-blockchain-import --input-file $BLOCKCHAIN_DOWNLOAD_DIR/blockchain.raw --batch-size 20000 --database lmdb#fastest --verify off --data-dir /home/monerodaemon/.bitmonero
 sudo -u monerodaemon rm -rf $BLOCKCHAIN_DOWNLOAD_DIR</span>
 sudo systemctl daemon-reload
-sudo systemctl enable monero
-sudo systemctl start monero
+sudo systemctl enable monerod
+sudo systemctl start monerod
+# deal with selinux
 <span class="strike">curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash
 source ~/.nvm/nvm.sh
 nvm install v6.9.2</span>
-cd ~/nodejs-pool
+cd /opt/nodejs-pool
 npm install
 <span class="strike">npm install -g pm2</span>
 <span class="strike">openssl req -subj "/C=IT/ST=Pool/L=Daemon/O=Mining Pool/CN=mining.pool" -newkey rsa:2048 -nodes -keyout cert.key -x509 -out cert.pem -days 36500</span>
-mkdir ~/pool_db/
-ln -svf nodejs-pool-config/config.thishost.json .
+sudo mkdir /opt/monero-data-dir/pool_db ; sudo chown -R monero.monero /opt/monero-data-dir/pool_db
+ln -svf nodejs-pool-config/config.thishost.json ./config.json
 <span class="strike">sed -r "s/(\"db_storage_path\": ).*/\1\"\/home\/$CURUSER\/pool_db\/\",/" config_example.json > config.json</span>
-cd ~
-git clone --recursive https://github.com/davepuchyr/poolui.git
+cd /opt
+sudo git clone --recursive https://github.com/davepuchyr/poolui.git ; sudo chown -R monero.monero poolui
 cd poolui
 yarn install
 ./node_modules/bower/bin/bower update
@@ -93,13 +94,15 @@ sudo systemctl enable caddy.service
 sudo systemctl start caddy.service
 rm -rf $CADDY_DOWNLOAD_DIR
 cd ~</span>
-sudo npm install -g pm2
-sudo pm2 startup systemd -u $CURUSER --hp `pwd`
-cd ~/nodejs-pool
-sudo chown -R $CURUSER ~/.pm2
-<span class="strike">echo "Installing pm2-logrotate in the background!"</span>
-pm2 install pm2-logrotate
-bash ~/nodejs-pool/deployment/install_lmdb_tools.sh
+!!! as root !!! npm install -g pm2
+!!! as root !!! mkdir /opt/.pm2 ; chown -R monero /opt/.pm2 ; ln -s /opt/.pm2 /opt/pm2
+!!! as root !!! pm2 startup systemd -u monero --hp /opt
+ln -svf /opt/.pm2 ~
+cd /opt/nodejs-pool
+<span class="strike">sudo chown -R $CURUSER ~/.pm2
+echo "Installing pm2-logrotate in the background!"</span>
+PM2_HOME=/opt/.pm2 pm2 install pm2-logrotate
+bash /opt/nodejs-pool/deployment/install_lmdb_tools.sh
 <span class="strike">mysql -u root -h nld -p < deployment/base.sql
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'authKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'Auth key sent with all Websocket frames for validation.')"
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'secKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'HMAC key for Passwords.  JWT Secret Key.  Changing this will invalidate all current logins.')"
