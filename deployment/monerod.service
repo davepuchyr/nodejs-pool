@@ -5,7 +5,8 @@ After=network.target
 [Service]
 Type=forking
 GuessMainPID=no
-ExecStart=/usr/local/src/monero/build/release/bin/monerod --rpc-bind-ip 127.0.0.1 --detach --restricted-rpc
+ExecStart=/opt/monero/build/release/bin/monerod --data-dir /opt/monero-data-dir --log-file /opt/monero-data-dir/bitmonero.log  --pidfile /opt/monero-data-dir/monerod.pid --rpc-bind-ip 127.0.0.1 --detach --restricted-rpc
+PIDFile=/opt/monero-data-dir/monerod.pid
 Restart=always
 User=monero
 
