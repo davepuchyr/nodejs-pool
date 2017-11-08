@@ -25,6 +25,17 @@
             "--debug=true",
             "--module=pool"
          ]
+      },
+      {
+         "type": "node",
+         "request": "launch",
+         "name": "remoteShare",
+         "program": "${workspaceFolder}/init.js",
+         "console": "internalConsole",
+         "args": [
+            "--debug=true",
+            "--module=remoteShare"
+         ]
       }
    ]
 }
