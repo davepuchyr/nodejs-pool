@@ -55,7 +55,7 @@ sudo systemctl start monerod
 source ~/.nvm/nvm.sh
 nvm install v6.9.2</span>
 cd /opt/nodejs-pool
-npm install
+yarn install
 <span class="strike">npm install -g pm2</span>
 <span class="strike">openssl req -subj "/C=IT/ST=Pool/L=Daemon/O=Mining Pool/CN=mining.pool" -newkey rsa:2048 -nodes -keyout cert.key -x509 -out cert.pem -days 36500</span>
 sudo mkdir /opt/monero-data-dir/pool_db ; sudo chown -R monero.monero /opt/monero-data-dir/pool_db
@@ -97,6 +97,7 @@ cd ~</span>
 !!! as root !!! npm install -g pm2
 !!! as root !!! mkdir /opt/.pm2 ; chown -R monero /opt/.pm2 ; ln -s /opt/.pm2 /opt/pm2
 !!! as root !!! pm2 startup systemd -u monero --hp /opt
+!!! as root !!! chmod a-x /etc/systemd/system/pm2-monero.service
 ln -svf /opt/.pm2 ~
 cd /opt/nodejs-pool
 <span class="strike">sudo chown -R $CURUSER ~/.pm2
@@ -107,11 +108,12 @@ bash /opt/nodejs-pool/deployment/install_lmdb_tools.sh
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'authKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'Auth key sent with all Websocket frames for validation.')"
 mysql -u root -h nld -p pool -e "INSERT INTO pool.config (module, item, item_value, item_type, Item_desc) VALUES ('api', 'secKey', '`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`', 'string', 'HMAC key for Passwords.  JWT Secret Key.  Changing this will invalidate all current logins.')"
 pm2 start init.js --name=api --log-date-format="YYYY-MM-DD HH:mm Z" -- --module=api</span>
-# only at genesis:
-mysql -u root -p < nodejs-pool-config/config.sql
+# only at genesis on nld:
+pm2 start /opt/monero/build/release/bin/monero-wallet-rpc -- --config-file /opt/nodejs-pool/nodejs-pool-config/monero-wallet-rpc.conf
 cd ~/nodejs-pool/sql_sync/
 node sql_sync.js
-echo "You're setup, excluding firewalld ports 8000, 8001 for api and 10000, 20000 for miners!  Please read the rest of the readme for the remainder of your setup and configuration."  <span class="strike">These steps include: Setting your Fee Address, Pool Address, Global Domain, and the Mailgun setup!</span>
+mysql -u root -p < nodejs-pool-config/config.sql
+echo "You're setup, excluding proxying ports 8000, 8001 for api and 10000, 20000 for miners!  Please read the rest of the readme for the remainder of your setup and configuration."  <span class="strike">These steps include: Setting your Fee Address, Pool Address, Global Domain, and the Mailgun setup!</span>
       </pre>
    </body>
 </html>
