@@ -39,7 +39,7 @@ cd /opt
 sudo sudo git clone https://github.com/monero-project/monero.git ; sudo chown -R monero monero
 cd monero
 sudo git checkout v0.11.1.x
-<span class="strike">curl https://raw.githubusercontent.com/Snipa22/nodejs-pool/master/deployment/monero_daemon.patch | sudo git apply -v</span>
+curl https://raw.githubusercontent.com/Snipa22/nodejs-pool/master/deployment/monero_daemon.patch | git apply -v
 sudo make -j$(nproc)
 sudo cp /opt/nodejs-pool/deployment/monerod.service /etc/systemd/system/
 <span class="strike">sudo useradd -m monerodaemon -d /home/monerodaemon
