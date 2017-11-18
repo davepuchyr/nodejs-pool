@@ -18,6 +18,19 @@
       {
          "type": "node",
          "request": "launch",
+         "name": "longRunner",
+         "program": "${workspaceFolder}/init.js",
+         "console": "internalConsole",
+         "env": {
+            "DEBUG": "db,local_comms"
+         },
+         "args": [
+            "--module=longRunner"
+         ]
+      },
+      {
+         "type": "node",
+         "request": "launch",
          "name": "pool",
          "program": "${workspaceFolder}/init.js",
          "console": "internalConsole",
